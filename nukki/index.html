@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>손글씨·도장 누끼따기 · 모닝스위머</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #F2F6FB;
+    margin: 0; padding: 24px 12px 48px; color: #1F2937; }
+  .card { max-width: 640px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E3EAF3;
+    border-radius: 18px; padding: 28px; }
+  .brand-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+  .brand { font-size: 14px; font-weight: 700; color: #1D4ED8; text-decoration: none; }
+  .brand:hover { text-decoration: underline; }
+  .brand-url { font-size: 12px; color: #9CA3AF; }
+  h1 { font-size: 21px; font-weight: 700; margin: 0 0 4px; }
+  .sub { font-size: 13px; color: #6B7280; margin: 0 0 20px; }
+  #drop { border: 1.5px dashed #93B4E7; border-radius: 12px; padding: 28px 16px; text-align: center;
+    cursor: pointer; background: #F7FAFF; color: #4B5563; font-size: 14px; transition: all .15s; }
+  #drop.over, #drop:hover { background: #EBF2FE; }
+  #drop small { color: #9CA3AF; }
+  #drop.compact { padding: 10px 16px; font-size: 13px; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; margin-top: 20px; }
+  .ctl-label { display: flex; justify-content: space-between; font-size: 13px; color: #1F2937; font-weight: 700; margin-bottom: 4px; }
+  .ctl-label b { color: #1D4ED8; font-weight: 700; }
+  input[type=range] { width: 100%; accent-color: #2563EB; margin: 0; }
+  .hint { font-size: 11.5px; color: #9CA3AF; margin: 6px 0 0; line-height: 1.55; }
+  .inks { display: flex; gap: 8px; align-items: center; }
+  .ink { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #E5E7EB; cursor: pointer; padding: 0; }
+  .ink.on { border-color: #2563EB; box-shadow: 0 0 0 2px #BFDBFE; }
+  input[type=color] { width: 26px; height: 26px; border: 2px solid #E5E7EB; border-radius: 50%;
+    padding: 0; cursor: pointer; background: none; }
+  .btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 20px; }
+  button.pill { padding: 9px 16px; border: 1px solid #D6DEE9; background: #fff; color: #374151;
+    border-radius: 999px; font-size: 13.5px; cursor: pointer; }
+  button.pill:hover { background: #F3F6FB; }
+  button.primary { background: #1D4ED8; border-color: #1D4ED8; color: #fff; font-weight: 700; }
+  button.primary:hover { background: #1E40AF; }
+  .spacer { flex: 1; }
+  #wrap { position: relative; display: inline-block; margin-top: 18px; max-width: 100%; }
+  canvas { display: block; max-width: 100%; border-radius: 10px;
+    background: repeating-conic-gradient(#E5EAF1 0% 25%, #fff 0% 50%) 0 0 / 18px 18px; }
+  #shadeWrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; border-radius: 10px; }
+  #shade { position: absolute; box-shadow: 0 0 0 9999px rgba(255,255,255,.5); }
+  #box { position: absolute; border: 2px solid #2563EB; cursor: move; touch-action: none; }
+  .hd { position: absolute; width: 16px; height: 16px; background: #2563EB; border: 2px solid #fff;
+    border-radius: 50%; touch-action: none; }
+  .hd[data-dir=nw]{left:-9px;top:-9px;cursor:nwse-resize} .hd[data-dir=ne]{right:-9px;top:-9px;cursor:nesw-resize}
+  .hd[data-dir=sw]{left:-9px;bottom:-9px;cursor:nesw-resize} .hd[data-dir=se]{right:-9px;bottom:-9px;cursor:nwse-resize}
+  .hd[data-dir=n]{left:calc(50% - 8px);top:-9px;cursor:ns-resize} .hd[data-dir=s]{left:calc(50% - 8px);bottom:-9px;cursor:ns-resize}
+  .hd[data-dir=w]{left:-9px;top:calc(50% - 8px);cursor:ew-resize} .hd[data-dir=e]{right:-9px;top:calc(50% - 8px);cursor:ew-resize}
+  footer { max-width: 640px; margin: 20px auto 0; font-size: 12.5px; color: #9CA3AF; text-align: center; line-height: 1.6; }
+  footer a { color: #1D4ED8; text-decoration: none; }
+  @media (max-width: 560px) {
+    .card { padding: 20px 16px; }
+    .controls { grid-template-columns: 1fr; }
+    button.pill { padding: 12px 18px; font-size: 15px; }
+    .hd { width: 20px; height: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand-row">
+    <a class="brand" href="https://blog.naver.com/yoonne__" target="_blank">🏊 모닝스위머</a>
+    <span class="brand-url">blog.naver.com/yoonne__</span>
+  </div>
+  <h1>손글씨·도장 누끼따기</h1>
+  <p class="sub">사진 속 글씨와 도장만 남기고 배경을 투명하게</p>
+
+  <div id="drop">사진을 끌어다 놓거나 클릭해서 선택<br>
+    <small>복사한 사진을 Ctrl+V (Mac: ⌘V)로 붙여넣어도 됩니다</small></div>
+  <input type="file" id="fi" accept="image/*" hidden>
+
+  <div class="controls" id="controls" hidden>
+    <div>
+      <div class="ctl-label"><span>진하기 기준</span><b id="thVal">170</b></div>
+      <input type="range" id="th" min="60" max="240" value="170">
+      <p class="hint">높이면 흐린 글씨까지 살아나지만 종이 질감·그림자도 함께 저장될 수 있어요</p>
+    </div>
+    <div>
+      <div class="ctl-label"><span>출력 크기</span><b id="size"></b></div>
+      <input type="range" id="scale" min="10" max="100" value="100">
+    </div>
+    <div>
+      <div class="ctl-label"><span>미세 회전</span><b id="fineVal">0°</b></div>
+      <input type="range" id="fine" min="-45" max="45" step="1" value="0">
+    </div>
+    <div>
+      <div class="ctl-label"><span>글씨 색</span></div>
+      <div class="inks">
+        <button class="ink" id="inkOrig" style="background:conic-gradient(#DC2626,#F59E0B,#10B981,#2563EB,#DC2626)" title="원본 색 유지 (도장 등)"></button>
+        <button class="ink on" data-c="#000000" style="background:#000" title="검정"></button>
+        <button class="ink" data-c="#1D4ED8" style="background:#1D4ED8" title="파랑"></button>
+        <button class="ink" data-c="#DC2626" style="background:#DC2626" title="빨강"></button>
+        <input type="color" id="inkCustom" value="#000000" title="원하는 색 직접 선택">
+      </div>
+      <p class="hint">무지개 원을 누르면 도장·색 펜의 원래 색이 그대로 유지돼요</p>
+    </div>
+  </div>
+
+  <div class="btns" id="btns" hidden>
+    <button class="pill" id="rotR">↻ 90° 회전</button>
+    <button class="pill" id="check" title="누르는 동안 저장될 픽셀을 전부 붉게 표시합니다.">잡티 확인</button>
+    <span class="spacer"></span>
+    <button class="pill" id="copyT" title="투명한 그대로 복사. 붙여넣는 앱이 투명도를 지원해야 합니다.">투명 복사</button>
+    <button class="pill" id="copyW" title="투명 복사가 검게 나오는 앱에서 사용하세요.">흰배경 복사</button>
+    <button class="pill primary" id="dl">투명 PNG 저장</button>
+  </div>
+  <p class="hint" id="hwpHint" hidden>한글(HWP)에 붙여넣을 땐 Ctrl+V 대신 [편집]→[골라 붙이기]에서 PNG(그림) 형식을 선택하세요.
+  검게 보이면 "투명 PNG 저장" 후 [입력]→[그림]으로 삽입하면 투명하게 들어갑니다.</p>
+
+  <div id="wrap" hidden>
+    <canvas id="cv"></canvas>
+    <div id="shadeWrap"><div id="shade"></div></div>
+    <div id="box"></div>
+  </div>
+  <p class="hint" id="boxHint" hidden>파란 상자를 끌어 저장 범위 조절 · 모서리 점으로 크기 변경 · "잡티 확인"을 누르고 있으면 저장될 부분이 붉게 표시</p>
+</div>
+<footer>
+  © 2026 <a href="https://blog.naver.com/yoonne__" target="_blank">모닝스위머 (blog.naver.com/yoonne__)</a> · v1.0<br>
+  사진은 서버로 전송되지 않고 브라우저 안에서만 처리됩니다.
+</footer>
+<script>
+const $ = id => document.getElementById(id);
+const drop = $('drop'), fi = $('fi'), wrap = $('wrap'), cv = $('cv'), ctx = cv.getContext('2d'),
+      boxEl = $('box'), shade = $('shade'), th = $('th'), scale = $('scale'), fine = $('fine'),
+      sizeEl = $('size'), thVal = $('thVal'), fineVal = $('fineVal');
+let img = null, rot = 0, bbox = null, box = null, PRE = 1, ink = [0, 0, 0];
+const PREVIEW_MAX = 1100;
+
+'nw n ne e se s sw w'.split(' ').forEach(dir => {
+  const h = document.createElement('div');
+  h.className = 'hd'; h.dataset.dir = dir; boxEl.appendChild(h);
+});
+
+drop.onclick = () => fi.click();
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); load(e.dataTransfer.files[0]); };
+fi.onchange = () => load(fi.files[0]);
+window.addEventListener('paste', e => {
+  const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+  if (item) { e.preventDefault(); load(item.getAsFile()); }
+});
+
+function load(file) {
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  img = new Image();
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    drop.classList.add('compact');
+    drop.innerHTML = '다른 사진 선택 (클릭 · 드래그 · Ctrl+V)';
+    render(true);
+  };
+  img.src = url;
+}
+
+function drawRotated(canvas, f) {
+  const rad = (rot + (+fine.value)) * Math.PI / 180;
+  const co = Math.abs(Math.cos(rad)), si = Math.abs(Math.sin(rad));
+  const w = Math.max(1, Math.round((img.width * co + img.height * si) * f));
+  const h = Math.max(1, Math.round((img.width * si + img.height * co) * f));
+  canvas.width = w; canvas.height = h;
+  const c = canvas.getContext('2d');
+  c.fillStyle = '#fff';
+  c.fillRect(0, 0, w, h);
+  c.save();
+  c.translate(w/2, h/2);
+  c.rotate(rad);
+  c.scale(f, f);
+  c.drawImage(img, -img.width/2, -img.height/2);
+  c.restore();
+  return c;
+}
+
+function applyCutout(c, w, h) {
+  const d = c.getImageData(0, 0, w, h), p = d.data;
+  const t = +th.value, soft = 45;
+  let minX = w, minY = h, maxX = -1, maxY = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const lum = 0.299*p[i] + 0.587*p[i+1] + 0.114*p[i+2];
+      let a;
+      if (lum >= t) a = 0;
+      else if (lum <= t - soft) a = 255;
+      else a = Math.round(255 * (t - lum) / soft);
+      if (a === 0) { p[i] = p[i+1] = p[i+2] = 255; }
+      else if (ink) { p[i] = ink[0]; p[i+1] = ink[1]; p[i+2] = ink[2]; }
+      p[i+3] = a;
+      if (a > 20) {
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+      }
+    }
+  }
+  c.putImageData(d, 0, 0);
+  if (maxX < 0) return { x: 0, y: 0, w, h };
+  return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+}
+
+function render(resetBox) {
+  if (!img) return;
+  const full = Math.max(img.width, img.height) * Math.SQRT2;
+  PRE = Math.min(1, PREVIEW_MAX / full);
+  drawRotated(cv, PRE);
+  bbox = applyCutout(ctx, cv.width, cv.height);
+  if (resetBox || !box) fitToInk();
+  clampBox();
+  wrap.hidden = false;
+  ['controls','btns','hwpHint','boxHint'].forEach(id => $(id).hidden = false);
+  requestAnimationFrame(positionBox);
+}
+
+function fitToInk() {
+  const m = Math.round(Math.max(bbox.w, bbox.h) * 0.08);
+  box = { x: bbox.x - m, y: bbox.y - m, w: bbox.w + 2*m, h: bbox.h + 2*m };
+  clampBox();
+}
+
+function clampBox() {
+  if (!box) return;
+  box.x = Math.max(0, box.x); box.y = Math.max(0, box.y);
+  box.w = Math.min(cv.width - box.x, Math.max(10, box.w));
+  box.h = Math.min(cv.height - box.y, Math.max(10, box.h));
+}
+
+function k() { return cv.getBoundingClientRect().width / cv.width; }
+
+function positionBox() {
+  if (!box) return;
+  const f = k();
+  [boxEl, shade].forEach(el => {
+    el.style.left = (box.x * f) + 'px';
+    el.style.top = (box.y * f) + 'px';
+    el.style.width = (box.w * f) + 'px';
+    el.style.height = (box.h * f) + 'px';
+  });
+  const s = (+scale.value) / 100;
+  sizeEl.textContent = Math.round(box.w / PRE * s) + ' × ' + Math.round(box.h / PRE * s) + ' px';
+}
+
+let drag = null;
+boxEl.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  drag = { dir: e.target.dataset.dir || 'move', sx: e.clientX, sy: e.clientY, b: { ...box } };
+  boxEl.setPointerCapture(e.pointerId);
+});
+boxEl.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const f = k(), dx = (e.clientX - drag.sx) / f, dy = (e.clientY - drag.sy) / f;
+  const b = drag.b, d = drag.dir;
+  let { x, y, w, h } = b;
+  if (d === 'move') { x = b.x + dx; y = b.y + dy; }
+  else {
+    if (d.includes('w')) { x = b.x + dx; w = b.w - dx; }
+    if (d.includes('e')) { w = b.w + dx; }
+    if (d.includes('n')) { y = b.y + dy; h = b.h - dy; }
+    if (d.includes('s')) { h = b.h + dy; }
+  }
+  if (w < 10) w = 10; if (h < 10) h = 10;
+  x = Math.min(Math.max(0, x), cv.width - w);
+  y = Math.min(Math.max(0, y), cv.height - h);
+  w = Math.min(w, cv.width - x); h = Math.min(h, cv.height - y);
+  box = { x, y, w, h };
+  positionBox();
+});
+boxEl.addEventListener('pointerup', () => drag = null);
+
+let pending = false;
+function queueRender(reset) {
+  if (pending) return;
+  pending = true;
+  requestAnimationFrame(() => { pending = false; render(reset); });
+}
+th.oninput = () => { thVal.textContent = th.value; queueRender(false); };
+fine.oninput = () => { fineVal.textContent = fine.value + '°'; queueRender(true); };
+scale.oninput = positionBox;
+window.addEventListener('resize', positionBox);
+$('rotR').onclick = () => { rot = (rot + 90) % 360; render(true); };
+
+document.querySelectorAll('.ink').forEach(b => b.onclick = () => setInk(b.dataset.c || null, b));
+$('inkCustom').oninput = e => setInk(e.target.value, null);
+function setInk(hex, btn) {
+  ink = hex ? [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)] : null;
+  document.querySelectorAll('.ink').forEach(x => x.classList.toggle('on', x === btn));
+  queueRender(false);
+}
+
+const checkBtn = $('check');
+function showCheck() {
+  if (!img) return;
+  drawRotated(cv, PRE);
+  const d = ctx.getImageData(0, 0, cv.width, cv.height), p = d.data;
+  const t = +th.value;
+  for (let i = 0; i < p.length; i += 4) {
+    const lum = 0.299*p[i] + 0.587*p[i+1] + 0.114*p[i+2];
+    const captured = lum < t;
+    p[i] = captured ? 225 : 255;
+    p[i+1] = captured ? 29 : 255;
+    p[i+2] = captured ? 72 : 255;
+    p[i+3] = 255;
+  }
+  ctx.putImageData(d, 0, 0);
+}
+checkBtn.addEventListener('pointerdown', showCheck);
+checkBtn.addEventListener('pointerup', () => { if (img) render(false); });
+checkBtn.addEventListener('pointerleave', () => { if (img) render(false); });
+
+function makeOutput() {
+  const oc = document.createElement('canvas');
+  const c = drawRotated(oc, 1);
+  applyCutout(c, oc.width, oc.height);
+  const s = (+scale.value) / 100, F = 1 / PRE;
+  const sx = box.x * F, sy = box.y * F, sw = box.w * F, sh = box.h * F;
+  const out = document.createElement('canvas');
+  out.width = Math.max(1, Math.round(sw * s));
+  out.height = Math.max(1, Math.round(sh * s));
+  out.getContext('2d').drawImage(oc, sx, sy, sw, sh, 0, 0, out.width, out.height);
+  return out;
+}
+
+const dlBtn = $('dl');
+dlBtn.onclick = () => {
+  const a = document.createElement('a');
+  a.download = 'nukki_transparent.png';
+  a.href = makeOutput().toDataURL('image/png');
+  a.click();
+  dlBtn.textContent = '저장됨 ✓';
+  setTimeout(() => dlBtn.textContent = '투명 PNG 저장', 2000);
+};
+
+async function copyImage(btn, whiteBg, label) {
+  try {
+    let src = makeOutput();
+    if (whiteBg) {
+      const flat = document.createElement('canvas');
+      flat.width = src.width; flat.height = src.height;
+      const fc = flat.getContext('2d');
+      fc.fillStyle = '#fff';
+      fc.fillRect(0, 0, flat.width, flat.height);
+      fc.drawImage(src, 0, 0);
+      src = flat;
+    }
+    const blob = await new Promise(r => src.toBlob(r, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    btn.textContent = '복사됨 ✓';
+  } catch (err) {
+    btn.textContent = '복사 실패: ' + (err.name || err.message);
+  }
+  setTimeout(() => btn.textContent = label, 2000);
+}
+$('copyT').onclick = () => copyImage($('copyT'), false, '투명 복사');
+$('copyW').onclick = () => copyImage($('copyW'), true, '흰배경 복사');
+</script>
+</body>
+</html>
