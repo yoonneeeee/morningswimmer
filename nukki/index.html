@@ -121,7 +121,7 @@
   <p class="hint" id="boxHint" hidden>파란 상자를 끌어 저장 범위 조절 · 모서리 점으로 크기 변경 · "잡티 확인"을 누르고 있으면 저장될 부분이 붉게 표시</p>
 </div>
 <footer>
-  © 2026 <a href="https://blog.naver.com/yoonne__" target="_blank">모닝스위머 (blog.naver.com/yoonne__)</a> · v1.0<br>
+  © 2026 <a href="https://blog.naver.com/yoonne__" target="_blank">모닝스위머 (blog.naver.com/yoonne__)</a> · v1.1<br>
   사진은 서버로 전송되지 않고 브라우저 안에서만 처리됩니다.
 </footer>
 <script>
@@ -326,12 +326,29 @@ function makeOutput() {
 }
 
 const dlBtn = $('dl');
-dlBtn.onclick = () => {
-  const a = document.createElement('a');
-  a.download = 'nukki_transparent.png';
-  a.href = makeOutput().toDataURL('image/png');
-  a.click();
-  dlBtn.textContent = '저장됨 ✓';
+dlBtn.onclick = async () => {
+  const blob = await new Promise(r => makeOutput().toBlob(r, 'image/png'));
+  try {
+    if (window.showSaveFilePicker) { // 파일명·저장 위치 직접 선택 (크롬·엣지)
+      const handle = await window.showSaveFilePicker({
+        suggestedName: '누끼_투명.png',
+        types: [{ description: 'PNG 이미지', accept: { 'image/png': ['.png'] } }]
+      });
+      const w = await handle.createWritable();
+      await w.write(blob);
+      await w.close();
+    } else { // 미지원 브라우저: 파일명 입력 후 다운로드
+      const name = (prompt('파일 이름을 입력하세요', '누끼_투명') || '누끼_투명').replace(/\.png$/i, '');
+      const a = document.createElement('a');
+      a.download = name + '.png';
+      a.href = URL.createObjectURL(blob);
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    dlBtn.textContent = '저장됨 ✓';
+  } catch (err) {
+    if (err.name !== 'AbortError') dlBtn.textContent = '저장 실패';
+  }
   setTimeout(() => dlBtn.textContent = '투명 PNG 저장', 2000);
 };
 
