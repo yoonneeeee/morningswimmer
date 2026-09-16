@@ -123,7 +123,7 @@
   <p class="hint" id="boxHint" hidden>파란 상자를 끌어 저장 범위 조절 · 모서리 점으로 크기 변경 · "잡티 확인"을 누르고 있으면 저장될 부분이 붉게 표시</p>
 </div>
 <footer>
-  © 2026 <a href="https://blog.naver.com/yoonne__" target="_blank">모닝스위머 (blog.naver.com/yoonne__)</a> · v1.3 ·
+  © 2026 <a href="https://blog.naver.com/yoonne__" target="_blank">모닝스위머 (blog.naver.com/yoonne__)</a> · v1.4 ·
   <a href="https://blog.naver.com/yoonne__/224371882158" target="_blank">사용법 안내 글</a><br>
   사진은 서버로 전송되지 않고 브라우저 안에서만 처리됩니다.<br>
   <img src="https://hits.sh/yoonneeeee.github.io/morningswimmer/nukki.svg?label=%EB%B0%A9%EB%AC%B8&color=1D4ED8"
@@ -332,23 +332,24 @@ function makeOutput() {
 
 const dlBtn = $('dl');
 dlBtn.onclick = async () => {
-  const blob = await new Promise(r => makeOutput().toBlob(r, 'image/png'));
   try {
-    if (window.showSaveFilePicker) { // 파일명·저장 위치 직접 선택 (크롬·엣지)
+    if (window.showSaveFilePicker) { // 파일명·저장 위치 직접 선택 (데스크톱 크롬·엣지)
       const handle = await window.showSaveFilePicker({
         suggestedName: '누끼_투명.png',
         types: [{ description: 'PNG 이미지', accept: { 'image/png': ['.png'] } }]
       });
+      const blob = await new Promise(r => makeOutput().toBlob(r, 'image/png'));
       const w = await handle.createWritable();
       await w.write(blob);
       await w.close();
-    } else { // 미지원 브라우저: 파일명 입력 후 다운로드
+    } else { // 모바일·미지원 브라우저: 파일명 입력 후 즉시 다운로드
       const name = (prompt('파일 이름을 입력하세요', '누끼_투명') || '누끼_투명').replace(/\.png$/i, '');
       const a = document.createElement('a');
       a.download = name + '.png';
-      a.href = URL.createObjectURL(blob);
+      a.href = makeOutput().toDataURL('image/png');
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(a.href);
+      a.remove();
     }
     dlBtn.textContent = '저장됨 ✓';
   } catch (err) {
