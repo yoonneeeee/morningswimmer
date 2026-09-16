@@ -123,7 +123,7 @@
   <p class="hint" id="boxHint" hidden>파란 상자를 끌어 저장 범위 조절 · 모서리 점으로 크기 변경 · "잡티 확인"을 누르고 있으면 저장될 부분이 붉게 표시</p>
 </div>
 <footer>
-  © 2026 <a href="https://blog.naver.com/yoonne__" target="_blank">모닝스위머 (blog.naver.com/yoonne__)</a> · v1.4 ·
+  © 2026 <a href="https://blog.naver.com/yoonne__" target="_blank">모닝스위머 (blog.naver.com/yoonne__)</a> · v1.5 ·
   <a href="https://blog.naver.com/yoonne__/224371882158" target="_blank">사용법 안내 글</a><br>
   사진은 서버로 전송되지 않고 브라우저 안에서만 처리됩니다.<br>
   <img src="https://hits.sh/yoonneeeee.github.io/morningswimmer/nukki.svg?label=%EB%B0%A9%EB%AC%B8&color=1D4ED8"
@@ -330,10 +330,23 @@ function makeOutput() {
   return out;
 }
 
+const IN_APP = /NAVER|KAKAOTALK|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
+function showSaveModal(url) { // 인앱 브라우저: 길게 눌러 저장 안내
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px;';
+  ov.innerHTML = '<p style="color:#fff;font-size:15px;text-align:center;line-height:1.7;margin:0;">앱 내 브라우저에서는 바로 저장이 안 돼요.<br>아래 이미지를 <b>길게 눌러</b><br>"사진에 추가" 또는 "이미지 저장"을 선택하세요</p>'
+    + '<img src="' + url + '" style="max-width:88%;max-height:55%;background:#fff;border-radius:10px;padding:8px;">'
+    + '<button style="padding:10px 26px;border:none;border-radius:999px;background:#fff;color:#1F2937;font-size:14px;">닫기</button>';
+  ov.querySelector('button').onclick = () => ov.remove();
+  document.body.appendChild(ov);
+}
+
 const dlBtn = $('dl');
 dlBtn.onclick = async () => {
   try {
-    if (window.showSaveFilePicker) { // 파일명·저장 위치 직접 선택 (데스크톱 크롬·엣지)
+    if (IN_APP) { // 네이버·카톡 등 인앱 브라우저
+      showSaveModal(makeOutput().toDataURL('image/png'));
+    } else if (window.showSaveFilePicker) { // 파일명·저장 위치 직접 선택 (데스크톱 크롬·엣지)
       const handle = await window.showSaveFilePicker({
         suggestedName: '누끼_투명.png',
         types: [{ description: 'PNG 이미지', accept: { 'image/png': ['.png'] } }]
