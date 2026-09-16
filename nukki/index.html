@@ -123,7 +123,7 @@
   <p class="hint" id="boxHint" hidden>파란 상자를 끌어 저장 범위 조절 · 모서리 점으로 크기 변경 · "잡티 확인"을 누르고 있으면 저장될 부분이 붉게 표시</p>
 </div>
 <footer>
-  © 2026 <a href="https://blog.naver.com/yoonne__" target="_blank">모닝스위머 (blog.naver.com/yoonne__)</a> · v1.5 ·
+  © 2026 <a href="https://blog.naver.com/yoonne__" target="_blank">모닝스위머 (blog.naver.com/yoonne__)</a> · v1.6 ·
   <a href="https://blog.naver.com/yoonne__/224371882158" target="_blank">사용법 안내 글</a><br>
   사진은 서버로 전송되지 않고 브라우저 안에서만 처리됩니다.<br>
   <img src="https://hits.sh/yoonneeeee.github.io/morningswimmer/nukki.svg?label=%EB%B0%A9%EB%AC%B8&color=1D4ED8"
@@ -331,6 +331,12 @@ function makeOutput() {
 }
 
 const IN_APP = /NAVER|KAKAOTALK|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
+if (IN_APP) { // 인앱 브라우저 안내 배너
+  const n = document.createElement('p');
+  n.style.cssText = 'background:#FFF7ED;border:1px solid #FDBA74;color:#9A3412;font-size:12.5px;border-radius:8px;padding:9px 13px;line-height:1.65;margin:0 0 14px;';
+  n.innerHTML = '📢 지금 앱 안의 브라우저로 보고 계세요. 여기서는 저장이 안 될 수 있어요.<br>공유(↗) 버튼 → <b>"기본 브라우저로 열기"</b>(사파리·크롬)로 여시면 정상 저장됩니다.';
+  document.querySelector('.sub').after(n);
+}
 function showSaveModal(url) { // 인앱 브라우저: 길게 눌러 저장 안내
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px;';
