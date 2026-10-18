@@ -45,4 +45,4 @@
 
 ## 만든 사람
 
-**모닝스위머** · [블로그](https://blog.naver.com/yoonne__) · [GitHub 프로필](https://github.com/yoonneeeee)
+**모닝스위머** · [GitHub 프로필](https://github.com/yoonneeeee)
